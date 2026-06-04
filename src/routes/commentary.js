@@ -63,15 +63,15 @@ commentaryRouter.post('/', async (req, res) => {
                 sequence: sequence ?? 0,
                 period,
                 eventType,
-                actor: actor || null,
-                team: team || null,
+                actor: actor ?? null,
+                team: team ?? null,
                 message,
                 metadata: metadata || null,
                 tags: tags ? JSON.stringify(tags) : null,
             })
             .returning();
 
-            if(res.app.locals.broadcastCommentary){
+            if(req.app.locals.broadcastCommentary){
                 req.app.locals.broadcastCommentary(event.matchId, event);
             }
 

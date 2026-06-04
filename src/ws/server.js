@@ -19,7 +19,7 @@ function unsubscribe(matchId, socket) {
     subscribers.delete(matchId);
 
     if (subscribers.size === 0) {
-        matchSubscribers.delete(matchId);
+        matchSubscribers.delete(socket);
     }
 }
 
@@ -67,6 +67,7 @@ function handleMessage(socket, data) {
             type: 'error',
             message: 'Invalid JSON'
         });
+        return;
     }
 
     if (message?.type === 'subscribe' && Number.isInteger(message.matchId)) {
@@ -95,10 +96,12 @@ export function attachWebSocketServer(server) {
 
                 if (decision.isDenied()) {
                     const code = decision.reason.isRateLimit() ? 1013 : 1008;
-
                     const reason = decision.reason.isRateLimit() ? 'Rate limit exceeded' : 'Access denied';
 
-                    socket.write('HTTP/1.1 403 Forbidden\r\n' + 'Connection: close\r\n' + '\r\n'); socket.destroy();
+                    socket.close(code, reason);
+                    if (socket.readyState !== WebSocket.CLOSING && socket.readyState !== WebSocket.CLOSED) {
+                        socket.terminate();
+                    }
 
                     console.log(`WS blocked: ${reason} (${code})`);
                     return;
@@ -106,12 +109,14 @@ export function attachWebSocketServer(server) {
             } catch (error) {
                 console.error('WS connection error', error);
 
-                socket.write('HTTP/1.1 500 Internal Server Error\r\n' + 'Connection: close\r\n' + '\r\n');
-                socket.destroy();
+                socket.close(1011, 'Internal server error');
+                if (socket.readyState !== WebSocket.CLOSING && socket.readyState !== WebSocket.CLOSED) {
+                    socket.terminate();
+                }
                 return;
             }
         }
-        
+
         socket.isAlive = true;
         socket.on('pong', () => { socket.isAlive = true; });
 

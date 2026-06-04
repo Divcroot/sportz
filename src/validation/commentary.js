@@ -22,10 +22,10 @@ const createCommentarySchema = z.object({
     .optional(),
   period: z.string().min(1, 'Period is required'),
   eventType: z.string().min(1, 'Event type is required'),
-  actor: z.string().min(1, 'Actor is required'),
-  team: z.string().min(1, 'Team is required'),
+  actor: z.string().min(1).optional(),
+  team: z.string().min(1).optional(),
   message: z.string().min(1, 'Message is required'),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   tags: z.array(z.string()).optional(),
 });
 
