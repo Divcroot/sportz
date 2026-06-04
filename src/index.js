@@ -2,6 +2,7 @@ import express from "express";
 import http from 'http';
 import matchRouter from "./routes/matches.js";
 import { attachWebSocketServer } from "./ws/server.js";
+import { securityMiddleware } from "../arcjet.js";
 
 const parsedPort = process.env.PORT ? Number(process.env.PORT) : 8000;
 if(!Number.isInteger(parsedPort) || parsedPort < 0 || parsedPort > 65535) {
@@ -15,6 +16,8 @@ const server = http.createServer(app);
 
 // JSON middleware
 app.use(express.json());
+
+app.use(securityMiddleware());
 
 // Root route
 app.get("/", (req, res) => {
