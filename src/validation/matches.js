@@ -31,8 +31,8 @@ const createMatchSchema = z
     sport: z.string().min(1, 'Sport is required'),
     homeTeam: z.string().min(1, 'Home team is required'),
     awayTeam: z.string().min(1, 'Away team is required'),
-    startTime: z.string(),
-    endTime: z.string(),
+    startTime: z.string().datetime(),
+    endTime: z.string().datetime(),
     homeScore: z.coerce
       .number()
       .int()
@@ -44,24 +44,6 @@ const createMatchSchema = z
       .nonnegative()
       .optional(),
   })
-  .refine(
-    (data) => {
-      try {
-        new Date(data.startTime).toISOString();
-        new Date(data.endTime).toISOString();
-        return (
-          !isNaN(Date.parse(data.startTime)) &&
-          !isNaN(Date.parse(data.endTime))
-        );
-      } catch {
-        return false;
-      }
-    },
-    {
-      message: 'startTime and endTime must be valid ISO date strings',
-      path: ['startTime', 'endTime'],
-    }
-  )
   .superRefine((data, ctx) => {
     const startTime = new Date(data.startTime);
     const endTime = new Date(data.endTime);
