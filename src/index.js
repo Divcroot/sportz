@@ -3,7 +3,11 @@ import http from 'http';
 import matchRouter from "./routes/matches.js";
 import { attachWebSocketServer } from "./ws/server.js";
 
-const PORT = Number(process.env.PORT || 8000);
+const parsedPort = process.env.PORT ? Number(process.env.PORT) : 8000;
+if(!Number.isInteger(parsedPort) || parsedPort < 0 || parsedPort > 65535) {
+  throw new Error(`Invalid PORT: ${process.env.PORT}`);
+}
+const PORT = parsedPort;
 const HOST = process.env.HOST || '0.0.0.0';
 
 const app = express();
